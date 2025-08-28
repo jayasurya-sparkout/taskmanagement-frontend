@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,7 @@ export function LoginForm({
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const router = useRouter();
 
   const handleLogIn = async (e: React.FormEvent) => {
 
@@ -36,13 +38,14 @@ export function LoginForm({
 
       const response = await loginUser(email, password);
       if (response && typeof response === "object" && "token" in response) {
-        // Type assertion for response
         const { token } = response as { token: string };
-        console.log(token);
+        setEmail('');
+        setPassword('');
         localStorage.setItem("token", token);
+        router.push("/dashboard");
       }
     } catch (error) {
-
+      console.log(error);
     }
 
   };
@@ -64,7 +67,7 @@ export function LoginForm({
       }
 
     } catch (error) {
-
+      console.log(error);
     }
 
   }
