@@ -1,25 +1,73 @@
 "use client"
 
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { FcGoogle } from "react-icons/fc"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { FcGoogle } from "react-icons/fc";
+
+// API Integration
+import { loginUser, registerUser } from "@/lib/authApi";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [isLogin, setIsLogin] = useState(true)
+  
+  const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const handleLogIn = async (e: React.FormEvent) => {
+
+    e.preventDefault();
+
+    try {
+
+      const response = await loginUser(email, password);
+      if (response && typeof response === "object" && "token" in response) {
+        // Type assertion for response
+        const { token } = response as { token: string };
+        console.log(token);
+        localStorage.setItem("token", token);
+      }
+    } catch (error) {
+
+    }
+
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+
+    e.preventDefault();
+
+    try {
+      const response = await registerUser(name, email, password);
+      console.log(response);
+      if (response) {
+        setName('');
+        setEmail('');
+        setPassword('');
+        if (!isLogin) {
+          setIsLogin(true);
+        }
+      }
+
+    } catch (error) {
+
+    }
+
+  }
 
   return (
     <div
@@ -42,8 +90,8 @@ export function LoginForm({
         </CardHeader>
 
         <CardContent className="m-auto w-full max-w-md">
-          <form className="flex flex-col gap-6">
-            {/* Show Name only in Register */}
+          <form className="flex flex-col gap-6" onSubmit={(!isLogin ? handleRegister : handleLogIn)}>
+
             {!isLogin && (
               <div className="grid gap-2">
                 <Label htmlFor="name">Full Name</Label>
@@ -51,8 +99,11 @@ export function LoginForm({
                   className="focus-visible:ring-0"
                   id="name"
                   type="text"
+                  value={name}
                   placeholder="John Doe"
-                  required
+                  onChange={(e) => {
+                    setName(e.target.value);
+                  }}
                 />
               </div>
             )}
@@ -63,7 +114,11 @@ export function LoginForm({
                 className="focus-visible:ring-0"
                 id="email"
                 type="email"
+                value={email}
                 placeholder="m@example.com"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
                 required
               />
             </div>
@@ -84,7 +139,10 @@ export function LoginForm({
                 id="password"
                 className="focus-visible:ring-0"
                 type="password"
-                required
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
             </div>
 
