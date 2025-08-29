@@ -42,7 +42,8 @@ export function LoginForm({
         setEmail('');
         setPassword('');
         localStorage.setItem("token", token);
-        router.push("/dashboard");
+        localStorage.setItem("userDetails", JSON.stringify(response));
+        router.push("/users");
       }
     } catch (error) {
       console.log(error);
